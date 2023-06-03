@@ -114,17 +114,35 @@ lower_ci = y_plot - (1.96 * np.std(y)/np.sqrt(N + 1))
 
 # plot the weather data
 plt.style.use("fivethirtyeight")
+plt.rcParams["figure.figsize"] = (16, 9)
+
 plt.scatter(
     daily_hist_series["year"][daily_hist_series["most_recent"] == 0],
     daily_hist_series["tmax"][daily_hist_series["most_recent"] == 0],
     color="gray",
+    zorder=2,
 )
 plt.scatter(
     daily_hist_series["year"][daily_hist_series["most_recent"] == 1],
     daily_hist_series["tmax"][daily_hist_series["most_recent"] == 1],
     color="red",
     label="Today",
+    zorder=3,
 )
+
+plt.plot(x_plot, y_plot, color="Black", zorder=1, label="Trend")
+
+plt.fill_between(
+    x_plot.reshape(-1),
+    upper_ci.reshape(-1),
+    lower_ci.reshape(-1),
+    color="tomato",
+    zorder=1,
+    alpha=0.3,
+    label="95% Confidence Interval",
+)
+
+
 plt.xlabel("Year")
 plt.ylabel("Daily High")
 plt.title("Daily High by Year")
