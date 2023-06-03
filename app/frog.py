@@ -26,17 +26,21 @@ try:
         access_token=access_token,
         access_token_secret=access_token_secret,
     )
-    logger.info("API credentials successfully verified.")
+    logger.info("Tweepy V2 API credentials successfully verified.")
 except Exception:
-    logger.info("Failed to authenticate API credentials.")
+    logger.info("Failed to authenticate Tweepy V2 API credentials.")
 
-auth = tweepy.OAuth1UserHandler(
-       consumer_key,
-       consumer_secret,
-       access_token,
-       access_token_secret
-    )
-api = tweepy.API(auth)
+try:
+    auth = tweepy.OAuth1UserHandler(
+        consumer_key,
+        consumer_secret,
+        access_token,
+        access_token_secret
+        )
+    api = tweepy.API(auth)
+    logger.info("Tweepy V1 API credentials successfully verified.")
+except Exception:
+    logger.info("Failed to authenticate Tweepy V1 API credentials.")
 
 
 
