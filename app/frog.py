@@ -8,10 +8,10 @@ from meteostat import Point
 from meteostat import units
 import numpy as np
 import pandas as pd
-import tweepy
-from sklearn.preprocessing import SplineTransformer
 from sklearn.linear_model import Ridge
 from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import SplineTransformer
+import tweepy
 
 logger = logging.getLogger()
 
@@ -35,16 +35,12 @@ except Exception:
 
 try:
     auth = tweepy.OAuth1UserHandler(
-        consumer_key,
-        consumer_secret,
-        access_token,
-        access_token_secret
-        )
+        consumer_key, consumer_secret, access_token, access_token_secret
+    )
     api = tweepy.API(auth)
     logger.info("Tweepy V1 API credentials successfully verified.")
 except Exception:
     logger.info("Failed to authenticate Tweepy V1 API credentials.")
-
 
 
 # fetch weather data from metostat API
@@ -109,8 +105,8 @@ y_plot = model.predict(x_plot)
 
 pct_bound = 0.1
 
-upper_ci = y_plot + (1.96 * np.std(y)/np.sqrt(N + 1))
-lower_ci = y_plot - (1.96 * np.std(y)/np.sqrt(N + 1))
+upper_ci = y_plot + (1.96 * np.std(y) / np.sqrt(N + 1))
+lower_ci = y_plot - (1.96 * np.std(y) / np.sqrt(N + 1))
 
 # plot the weather data
 plt.style.use("fivethirtyeight")
@@ -147,7 +143,7 @@ plt.xlabel("Year")
 plt.ylabel("Daily High")
 plt.title("Daily High by Year")
 plt.legend(loc="upper left")
-plt.savefig('daily_plot.jpeg')
+plt.savefig("daily_plot.jpeg")
 
 media = api.media_upload(filename="daily_plot.jpeg")
 
