@@ -9,6 +9,9 @@ from meteostat import units
 import numpy as np
 import pandas as pd
 import tweepy
+from sklearn.preprocessing import SplineTransformer
+from sklearn.linear_model import Ridge
+from sklearn.pipeline import make_pipeline
 
 logger = logging.getLogger()
 
@@ -45,7 +48,7 @@ except Exception:
 
 
 # fetch weather data from metostat API
-N = 30
+N = 75
 end = datetime.now()
 start = datetime(end.year - N, end.month, end.day)
 
@@ -73,7 +76,7 @@ daily_max_avg["time"] = daily_max_avg.index.values
 today = end.strftime("%Y-%m-%d")
 todays_high = data.tmax.loc[today]
 
-Month, Day = end.month, end.day
+Month, Day, Year = end.month, end.day, end.year
 todays_avg_high = daily_max_avg.tmax.loc[(Month, Day)]
 todays_max_high = daily_max_max.tmax.loc[(Month, Day)]
 
@@ -93,6 +96,21 @@ daily_hist_series = data[(data["month"] == Month) & (data["day"] == Day)]
 daily_hist_series["most_recent"] = np.where(
     daily_hist_series["year"] == daily_hist_series["year"].max(), 1, 0
 )
+
+# fit the spline to the trends over the last N years
+x, y = daily_hist_series["year"].values.reshape(-1, 1), daily_hist_series[
+    ["tmax"]
+].values.reshape(-1, 1)
+model = make_pipeline(SplineTransformer(n_knots=4, degree=2), Ridge(alpha=1e-3))
+model.fit(x, y)
+
+x_plot = np.linspace(Year - N, Year, 500).reshape(-1, 1)
+y_plot = model.predict(x_plot)
+
+pct_bound = 0.1
+
+upper_ci = y_plot + (1.96 * np.std(y)/np.sqrt(N + 1))
+lower_ci = y_plot - (1.96 * np.std(y)/np.sqrt(N + 1))
 
 # plot the weather data
 plt.style.use("fivethirtyeight")
