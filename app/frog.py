@@ -76,22 +76,22 @@ Month, Day, Year = end.month, end.day, end.year
 todays_avg_high = daily_max_avg.tmax.loc[(Month, Day)]
 todays_max_high = daily_max_max.tmax.loc[(Month, Day)]
 
-# Compare weather conditions
-if todays_high > todays_avg_high:
-    forecast_tweet = f"NYC: The high today is {todays_high:.1f}°F, which is {abs(todays_high - todays_avg_high):.1f}°F hotter than today's {N}-year average."
-else:
-    forecast_tweet = f"NYC: The high today is {todays_high:.1f}°F, which is {abs(todays_high - todays_avg_high):.1f}°F cooler than today's {N}-year average."
-
-forecast_tweet += (
-    f"\n\nThe {N}-year historical high for today is {todays_max_high:.1f}°F."
-)
-
 # generate dataframe for scatter plot
 pd.options.mode.chained_assignment = None
 daily_hist_series = data[(data["month"] == Month) & (data["day"] == Day)]
 daily_hist_series["most_recent"] = np.where(
     daily_hist_series["year"] == daily_hist_series["year"].max(), 1, 0
 )
+
+todays_max_high_year = np.argmax(daily_hist_series[["tmax"]].values) + start.year
+
+# Compare weather conditions
+if todays_high > todays_avg_high:
+    forecast_tweet = f"NYC: The high today is {todays_high:.1f}°F, which is {abs(todays_high - todays_avg_high):.1f}°F hotter than today's {N}-year average."
+else:
+    forecast_tweet = f"NYC: The high today is {todays_high:.1f}°F, which is {abs(todays_high - todays_avg_high):.1f}°F cooler than today's {N}-year average."
+
+forecast_tweet += f"\n\nThe {N}-year historical high for today of {todays_max_high:.1f}°F  was set in {todays_max_high_year}."
 
 # fit the spline to the trends over the last N years
 x, y = daily_hist_series["year"].values.reshape(-1, 1), daily_hist_series[
@@ -112,9 +112,22 @@ jackknife_se = residuals / (res_sd * np.sqrt(1 - leverage))
 upper_jk_ci = y_plot + (1.96 * jackknife_se)
 lower_jk_ci = y_plot - (1.96 * jackknife_se)
 
-months = "January February March April May June July August September October November December".split(" ")
+months = "January February March April May June July August September October November December".split(
+    " "
+)
 months_formatter = {idx + 1: month for (idx, month) in enumerate(months)}
-days_formatter = {1: 'st', 2: 'nd', 3: 'rd', 4: 'th', 5: 'th', 6: 'th', 7: 'th', 8: 'th', 9: 'th', 0: 'th'}
+days_formatter = {
+    1: "st",
+    2: "nd",
+    3: "rd",
+    4: "th",
+    5: "th",
+    6: "th",
+    7: "th",
+    8: "th",
+    9: "th",
+    0: "th",
+}
 
 # plot the weather data
 plt.style.use("fivethirtyeight")
@@ -149,8 +162,10 @@ plt.fill_between(
 
 plt.xlabel("Year")
 plt.ylabel("Daily High in Degrees °F")
-plt.title(f"Daily High on {months_formatter[Month]} {Day}{days_formatter[Day%10]} by Year")
-plt.legend(loc="upper left")
+plt.title(
+    f"Daily High on {months_formatter[Month]} {Day}{days_formatter[Day%10]} by Year"
+)
+plt.legend()
 plt.savefig("daily_plot.jpeg")
 
 media = api.media_upload(filename="daily_plot.jpeg")
