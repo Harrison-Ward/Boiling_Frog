@@ -78,9 +78,9 @@ todays_max_high = daily_max_max.tmax.loc[(Month, Day)]
 
 # Compare weather conditions
 if todays_high > todays_avg_high:
-    forecast_tweet = f"NYC: The high today is {todays_high:.1f}°F, which is {todays_high - todays_avg_high:.1f}°F hotter than today's {N}-year average."
+    forecast_tweet = f"NYC: The high today is {todays_high:.1f}°F, which is {abs(todays_high - todays_avg_high):.1f}°F hotter than today's {N}-year average."
 else:
-    forecast_tweet = f"NYC: The high today is {todays_high:.1f}°F, which is {todays_high - todays_avg_high:.1f}°F cooler than today's {N}-year average."
+    forecast_tweet = f"NYC: The high today is {todays_high:.1f}°F, which is {abs(todays_high - todays_avg_high):.1f}°F cooler than today's {N}-year average."
 
 forecast_tweet += (
     f"\n\nThe {N}-year historical high for today is {todays_max_high:.1f}°F."
