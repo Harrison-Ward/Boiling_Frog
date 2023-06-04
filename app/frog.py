@@ -100,13 +100,21 @@ x, y = daily_hist_series["year"].values.reshape(-1, 1), daily_hist_series[
 model = make_pipeline(SplineTransformer(n_knots=4, degree=2), Ridge(alpha=1e-3))
 model.fit(x, y)
 
+y_true_long = np.linspace(y.min(), y.max(), 500).reshape(-1)
 x_plot = np.linspace(Year - N, Year, 500).reshape(-1, 1)
-y_plot = model.predict(x_plot)
+y_plot = model.predict(x_plot).reshape(-1)
 
-pct_bound = 0.1
+residuals = (y_true_long - y_plot).reshape(-1)
+res_sd = np.std(residuals)
+leverage = np.diagonal(x_plot.dot(np.linalg.inv(x_plot.T.dot(x_plot)).dot(x_plot.T)))
+jackknife_se = residuals / (res_sd * np.sqrt(1 - leverage))
 
-upper_ci = y_plot + (1.96 * np.std(y) / np.sqrt(N + 1))
-lower_ci = y_plot - (1.96 * np.std(y) / np.sqrt(N + 1))
+upper_jk_ci = y_plot + (1.96 * jackknife_se)
+lower_jk_ci = y_plot - (1.96 * jackknife_se)
+
+months = "January February March April May June July August September October November December".split(" ")
+months_formatter = {idx + 1: month for (idx, month) in enumerate(months)}
+days_formatter = {1: 'st', 2: 'nd', 3: 'rd', 4: 'th', 5: 'th', 6: 'th', 7: 'th', 8: 'th', 9: 'th', 0: 'th'}
 
 # plot the weather data
 plt.style.use("fivethirtyeight")
@@ -116,32 +124,32 @@ plt.scatter(
     daily_hist_series["year"][daily_hist_series["most_recent"] == 0],
     daily_hist_series["tmax"][daily_hist_series["most_recent"] == 0],
     color="gray",
-    zorder=2,
+    zorder=3,
 )
 plt.scatter(
     daily_hist_series["year"][daily_hist_series["most_recent"] == 1],
     daily_hist_series["tmax"][daily_hist_series["most_recent"] == 1],
     color="red",
     label="Today",
-    zorder=3,
+    zorder=4,
 )
 
-plt.plot(x_plot, y_plot, color="Black", zorder=1, label="Trend")
+plt.plot(x_plot, y_plot, color="Black", zorder=2, label="Trend")
 
 plt.fill_between(
     x_plot.reshape(-1),
-    upper_ci.reshape(-1),
-    lower_ci.reshape(-1),
+    upper_jk_ci,
+    lower_jk_ci,
     color="tomato",
     zorder=1,
     alpha=0.3,
-    label="95% Confidence Interval",
+    label="95% Confidence Interval of Trend",
 )
 
 
 plt.xlabel("Year")
-plt.ylabel("Daily High")
-plt.title("Daily High by Year")
+plt.ylabel("Daily High in Degrees °F")
+plt.title(f"Daily High on {months_formatter[Month]} {Day}{days_formatter[Day%10]} by Year")
 plt.legend(loc="upper left")
 plt.savefig("daily_plot.jpeg")
 
