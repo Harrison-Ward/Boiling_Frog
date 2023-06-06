@@ -97,8 +97,7 @@ if todays_high > todays_avg_high:
     forecast_tweet = f"NYC: The high today is {todays_high:.1f}°F, which is {abs(todays_high - todays_avg_high):.1f}°F hotter than today's {N}-year average."
 else:
     forecast_tweet = f"NYC: The high today is {todays_high:.1f}°F, which is {abs(todays_high - todays_avg_high):.1f}°F cooler than today's {N}-year average."
-
-forecast_tweet += f"\n\nThe {N}-year historical high for today of {todays_max_high:.1f}°F  was set in {todays_max_high_year}."
+forecast_tweet += f"\n\nToday's {N}-year historical high of {todays_max_high:.1f}°F  was set in {todays_max_high_year}."
 
 # Fit a spline to create a trend line over the last N years
 x, y = daily_hist_series["year"].values.reshape(-1, 1), daily_hist_series[
