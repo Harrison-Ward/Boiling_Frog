@@ -1,3 +1,4 @@
+#!/opt/anaconda3/envs/cs109b/bin/python
 from datetime import datetime
 import logging
 
@@ -176,10 +177,10 @@ def main():
         f"Daily High on {months_formatter[Month]} {Day}{days_formatter[Day%10]} by Year"
     )
     plt.legend()
-    plt.savefig("daily_plot.jpeg")
+    plt.savefig("image_output/daily_plot.jpeg")
 
     # upload the media to the Tweepy API
-    media = api.media_upload(filename="daily_plot.jpeg")
+    media = api.media_upload(filename="image_output/daily_plot.jpeg")
 
     # tweet the takeaway
     response = client.create_tweet(text=forecast_tweet, media_ids=[media.media_id_string])
